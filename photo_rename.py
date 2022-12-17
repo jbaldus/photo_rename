@@ -75,5 +75,6 @@ if __name__ == "__main__":
 
     for f in args.files:
         path = Path(f)
-        try_rename(path, get_tags(path), not_really=args.not_really)
+        if path.is_file():
+            try_rename(path, get_tags(path), not_really=args.not_really)
             
