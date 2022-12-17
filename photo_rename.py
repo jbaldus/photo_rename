@@ -7,7 +7,8 @@ import logging
 import exifread
 
 logging.basicConfig()
-logging.setLevel(logging.CRITICAL)
+logger = logging.getLogger("rename_photos")
+logger.setLevel(logging.CRITICAL)
 
 
 file_name_format = "%Y%m%d_%H%M%S"
@@ -33,13 +34,13 @@ def get_tags(image_path:Path) -> dict:
 
 def rename(path:Path, new_path:Path, not_really = False) -> Path:
     if new_path == path:
-        logging.warning(f"Not Renaming {path} to {new_path}, they're the same.")
+        logger.warning(f"Not Renaming {path} to {new_path}, they're the same.")
         return path
     adjusted_new_path = uniquify(new_path)
     if not_really:
         print(f"Would rename {path} -> {adjusted_new_path}")
     else:
-        logging.warning(f"Actually renaming {path} -> {adjusted_new_path}")
+        logger.warning(f"Actually renaming {path} -> {adjusted_new_path}")
         return path.rename(adjusted_new_path)
 
 def try_rename(path:Path, tags:dict, not_really = False) -> Path:
@@ -52,9 +53,9 @@ def try_rename(path:Path, tags:dict, not_really = False) -> Path:
         dt = tags["Image DateTime"].values
     date_tags = [k for k in tags.keys() if 'Date' in k]
     if dt is None:
-        logging.info(f"Could not find date information for {path}.")
+        logger.info(f"Could not find date information for {path}.")
         if date_tags:
-            logging.info(f"Would any of these work: {date_tags}?")
+            logger.info(f"Would any of these work: {date_tags}?")
         return None
     dt = datetime.strptime(dt, exif_time_format)
     new_stem = dt.strftime(file_name_format)
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     log_levels = [logging.CRITICAL, logging.WARNING, logging.INFO, logging.DEBUG]
-    logging.setLevel(log_levels[min((args.verbose, len(log_levels)-1))])
+    logger.setLevel(log_levels[min((args.verbose, len(log_levels)-1))])
 
     for f in args.files:
         path = Path(f)
